@@ -1,15 +1,7 @@
-class Configuration {
-  NODE_ENV: string;
-  IS_DEV: boolean;
-  PORT: number;
-  GLOBAL_PREFIX: string;
-
-  constructor() {
-    this.NODE_ENV = process.env.NODE_ENV || 'development';
-    this.IS_DEV = this.NODE_ENV === 'development';
-    this.PORT = Number(process.env.PORT) || 3300;
-    this.GLOBAL_PREFIX = process.env.GLOBAL_PREFIX || 'api/v1';
-  }
+import { BaseConfiguration } from '@common/configuration/base.config';
+import { AppConfiguration } from '@common/configuration/app.config';
+class Configuration extends BaseConfiguration {
+  APP_CONFIG = new AppConfiguration();
 }
 
 export const CONFIGURATION = new Configuration();
