@@ -2,9 +2,9 @@ import { IsNumber } from 'class-validator';
 
 export class AppConfiguration {
   @IsNumber()
-  PORT: string;
+  PORT: number;
 
   constructor() {
-    this.PORT = process.env['PORT'] || '3000';
+    this.PORT = Number(process.env['PORT']) || 3000;
   }
 }
