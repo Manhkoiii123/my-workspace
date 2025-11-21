@@ -7,19 +7,14 @@ import { LoggerMiddleware } from '@common/middlewares/logger.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { exceptionInterceptor } from '@common/interceptors/exception.interceptor';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { TCP_SERVICES, TcpProvider } from '@common/configuration/tcp.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [() => CONFIGURATION],
     }),
-    ClientsModule.register([
-      {
-        name: 'TCP_INVOICE_SERVICE',
-        transport: Transport.TCP,
-        options: { host: 'localhost', port: 3301 },
-      },
-    ]),
+    ClientsModule.registerAsync([TcpProvider(TCP_SERVICES.INVOICE_SERVICE)]),
   ],
   controllers: [AppController],
   providers: [
