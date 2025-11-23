@@ -4,7 +4,7 @@ import { PORT } from '@common/constants/common.constant';
 export class AppService {
   getData(): { message: string } {
     console.log(PORT);
-    throw new BadRequestException('Method not implemented.');
+    // throw new BadRequestException('Method not implemented.');
     return { message: 'Hello API bff' };
   }
 }
