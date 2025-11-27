@@ -1,6 +1,7 @@
 import { Type } from '@nestjs/common';
 import { Prop, SchemaFactory, Virtual } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
+import { Schema as MongooseSchema } from 'mongoose';
 
 export class BaseSchema {
   _id: ObjectId;
@@ -17,10 +18,13 @@ export class BaseSchema {
   updatedAt: Date;
 }
 
-export const createSchema = <TClass = any>(target: Type<TClass>) => {
+export const createSchema = <TClass = any>(
+  target: Type<TClass>
+): MongooseSchema<TClass> => {
   const schema = SchemaFactory.createForClass(target);
   schema.set('toJSON', { virtuals: true });
   schema.set('toObject', { virtuals: true });
   schema.set('timestamps', true);
   schema.set('versionKey', false);
+  return schema;
 };
