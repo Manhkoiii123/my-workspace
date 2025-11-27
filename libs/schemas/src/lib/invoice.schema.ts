@@ -41,8 +41,8 @@ export class Invoice extends BaseSchema {
   @Prop({ type: String, enum: INVOICE_STATUS, default: INVOICE_STATUS.CREATED })
   status: INVOICE_STATUS;
 
-  @Prop({ type: Item })
-  item: Item[];
+  @Prop({ type: [Item] })
+  items: Item[];
 
   @Prop({ type: String, required: false })
   supervisorId?: string;

@@ -1,24 +1,21 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+
 import { ConfigModule } from '@nestjs/config';
 import { CONFIGURATION, TConfiguration } from '../configuration';
 import { LoggerMiddleware } from '@common/middlewares/logger.middleware';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { exceptionInterceptor } from '@common/interceptors/exception.interceptor';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { TCP_SERVICES, TcpProvider } from '@common/configuration/tcp.config';
+import { InvoiceModule } from './modules/invoice/invoice.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [() => CONFIGURATION],
     }),
-    ClientsModule.registerAsync([TcpProvider(TCP_SERVICES.INVOICE_SERVICE)]),
+    InvoiceModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_INTERCEPTOR,
       useClass: exceptionInterceptor,

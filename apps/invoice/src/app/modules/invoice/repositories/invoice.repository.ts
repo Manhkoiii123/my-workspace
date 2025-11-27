@@ -13,7 +13,7 @@ export class InvoiceRepository {
     @InjectModel(InvoiceModelName) private readonly invoiceModel: InvoiceModel
   ) {}
 
-  createInvoice(data: Partial<Invoice>) {
+  create(data: Partial<Invoice>) {
     return this.invoiceModel.create({
       ...data,
       status: INVOICE_STATUS.CREATED,
