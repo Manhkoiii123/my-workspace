@@ -28,7 +28,7 @@ services:
       POSTGRES_PASSWORD: example
       POSTGRES_DB: einvoice-app
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - ./docker/docker_data/postgres_data:/var/lib/postgresql/data
     networks:
