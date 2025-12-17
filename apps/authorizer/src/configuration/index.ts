@@ -3,8 +3,7 @@ import { AppConfiguration } from '@common/configuration/app.config';
 import { ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TcpConfiguration } from '@common/configuration/tcp.config';
-import { MongoConfiguration } from '@common/configuration/mongo.config';
-import { TypeOrmConfiguration } from '@common/configuration/type-orm.config';
+import { KeycloakConfiguration } from '@common/configuration/keycloak.config';
 class Configuration extends BaseConfiguration {
   @ValidateNested()
   @Type(() => AppConfiguration)
@@ -15,12 +14,8 @@ class Configuration extends BaseConfiguration {
   TCP_SERV = new TcpConfiguration();
 
   @ValidateNested()
-  @Type(() => MongoConfiguration)
-  MONGO_CONFIG = new MongoConfiguration();
-
-  @ValidateNested()
-  @Type(() => TypeOrmConfiguration)
-  TYPEORM_CONFIG = new TypeOrmConfiguration();
+  @Type(() => KeycloakConfiguration)
+  KEYCLOAK_CONFIG = new KeycloakConfiguration();
 }
 
 export const CONFIGURATION = new Configuration();

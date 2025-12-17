@@ -9,7 +9,7 @@ class Configuration extends BaseConfiguration {
   APP_CONFIG = new AppConfiguration();
 
   @ValidateNested()
-  @Type(() => AppConfiguration)
+  @Type(() => TcpConfiguration)
   TCP_SERV = new TcpConfiguration();
 }
 

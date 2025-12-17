@@ -2,7 +2,7 @@
   "collection": "role",
   "data": [
     {
-      "_id": "68a3f21b3e811435a80e04",
+      "_id": "68a3f2f1b3e811435a8ad004",
       "name": "administrator",
       "description": "admin role with all permissions",
       "permissions": [
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "_id": "68a3f21b3e811435a80e05",
+      "_id": "68a3f2f1b3e811435a8ad005",
       "name": "accountant",
       "description": "accountant role with user permissions",
       "permissions": [
