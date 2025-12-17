@@ -8,6 +8,8 @@ import { ProcessId } from '@common/decorators/processId.decorator';
 import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.enum';
 import { CreateUserTcpRequest } from '@common/interfaces/tcp/user';
 import { map } from 'rxjs';
+import { Authorization } from '@common/decorators/authorizer.decorator';
+
 @ApiTags('User')
 @Controller('user')
 export class UserController {
@@ -21,6 +23,7 @@ export class UserController {
     type: ResponseDto<string>,
   })
   @ApiOperation({ summary: 'Create new user' })
+  @Authorization({ secured: false })
   async create(
     @Body() body: CreateUserRequestDto,
     @ProcessId() processId: string
