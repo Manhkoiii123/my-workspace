@@ -14,6 +14,7 @@ import {
   InvoiceTcpResponse,
 } from '@common/interfaces/tcp/invoice';
 import { map } from 'rxjs';
+import { Authorization } from '@common/decorators/authorizer.decorator';
 @ApiTags('Invoice')
 @Controller('invoice')
 export class InvoiceController {
@@ -25,6 +26,7 @@ export class InvoiceController {
   @Post()
   @ApiOkResponse({ type: ResponseDto<InvoiceResponseDto> })
   @ApiOperation({ summary: 'Create Invoice' })
+  @Authorization({ secured: true })
   create(
     @Body() body: CreateInvoiceRequestDto,
     @ProcessId() processId: string

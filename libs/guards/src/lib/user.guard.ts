@@ -1,10 +1,27 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  Logger,
+  Inject,
+} from '@nestjs/common';
+import { firstValueFrom, map, Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { MetadataKeys } from '@common/constants/common.constant';
+import { getAccessToken } from '@common/utils/request.utils';
+import { TCP_SERVICES } from '@common/configuration/tcp.config';
+import { TcpClient } from '@common/interfaces/tcp/common/tcp-client.interface';
+import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.enum';
+import { AuthorizeResponse } from '@common/interfaces/tcp/authorizer';
 @Injectable()
 export class UserGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  private readonly logger = new Logger(UserGuard.name);
+  constructor(
+    private readonly reflector: Reflector,
+    @Inject(TCP_SERVICES.AUTHORIZER_SERVICE)
+    private readonly authorizerClient: TcpClient
+  ) {}
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -12,9 +29,43 @@ export class UserGuard implements CanActivate {
       MetadataKeys.SECURED,
       context.getHandler()
     );
-    if (authOptions?.secured) {
-      return false;
+    const req = context.switchToHttp().getRequest();
+    // api public (ser = false)
+    if (!authOptions?.secured) {
+      return true;
     }
-    return true;
+    return this.verifyToken(req);
+  }
+
+  // function verifytoken user
+
+  private async verifyToken(request: any): Promise<boolean> {
+    try {
+      const token = getAccessToken(request);
+      const processId = request[MetadataKeys.PROCESS_ID];
+      // call tcp qua auth để verify token
+      const res = await this.verifyUserToken(token, processId);
+      if (!res?.valid) {
+        throw new UnauthorizedException("Token doesn't exist");
+      }
+      return true;
+    } catch (error) {
+      this.logger.error({ error });
+      throw new UnauthorizedException("Token doesn't exist");
+    }
+  }
+
+  private async verifyUserToken(token: string, processId: string) {
+    return firstValueFrom(
+      this.authorizerClient
+        .send<AuthorizeResponse, string>(
+          TCP_REQUEST_MESSAGE.AUTHORIZER.VERIFY_USER_TOKEN,
+          {
+            data: token,
+            processId,
+          }
+        )
+        .pipe(map((data) => data.data))
+    );
   }
 }
