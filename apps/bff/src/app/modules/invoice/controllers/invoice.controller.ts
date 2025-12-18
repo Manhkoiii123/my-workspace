@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Logger, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CreateInvoiceRequestDto,
@@ -15,6 +15,8 @@ import {
 } from '@common/interfaces/tcp/invoice';
 import { map } from 'rxjs';
 import { Authorization } from '@common/decorators/authorizer.decorator';
+import { UserData } from '@common/decorators/user-data.decorator';
+import { AuthorizeResponse } from '@common/interfaces/tcp/authorizer';
 @ApiTags('Invoice')
 @Controller('invoice')
 export class InvoiceController {
@@ -29,8 +31,10 @@ export class InvoiceController {
   @Authorization({ secured: true })
   create(
     @Body() body: CreateInvoiceRequestDto,
-    @ProcessId() processId: string
+    @ProcessId() processId: string,
+    @UserData() userData: AuthorizeResponse
   ) {
+    Logger.debug('create invoice user', userData);
     return this.invoiceClient
       .send<InvoiceTcpResponse, CreateInvoiceTcpRequest>(
         TCP_REQUEST_MESSAGE.INVOICE.CREATE,

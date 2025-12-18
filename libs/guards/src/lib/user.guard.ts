@@ -9,7 +9,7 @@ import {
 import { firstValueFrom, map, Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { MetadataKeys } from '@common/constants/common.constant';
-import { getAccessToken } from '@common/utils/request.utils';
+import { getAccessToken, setUserData } from '@common/utils/request.utils';
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
 import { TcpClient } from '@common/interfaces/tcp/common/tcp-client.interface';
 import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.enum';
@@ -48,6 +48,7 @@ export class UserGuard implements CanActivate {
       if (!res?.valid) {
         throw new UnauthorizedException("Token doesn't exist");
       }
+      setUserData(request, res);
       return true;
     } catch (error) {
       this.logger.error({ error });

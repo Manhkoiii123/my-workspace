@@ -28,7 +28,7 @@ export class AuthorizerController {
     @RequestParam() data: string,
     @ProcessId() processId: string
   ) {
-    const res = await this.authorizerService.verifyUserToken(data);
+    const res = await this.authorizerService.verifyUserToken(data, processId);
     return Response.success<AuthorizeResponse>(res);
   }
 }
