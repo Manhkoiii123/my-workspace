@@ -6,5 +6,6 @@ export function getAccessToken(request: any, keepBearer = false) {
   return keepBearer ? token : parseToken(token);
 }
 export function setUserData(request: any, data?: AuthorizeResponse) {
+  console.log('🚀 ~ setUserData ~ data:', data);
   request[MetadataKeys.USER] = data;
 }

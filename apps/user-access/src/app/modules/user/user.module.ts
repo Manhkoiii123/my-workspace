@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserDestination } from '@common/schemas/user.schema';
+import { RoleDestination } from '@common/schemas/role.schema';
 import { UserController } from './controllers/user.controller';
 import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
@@ -9,7 +10,7 @@ import { TCP_SERVICES, TcpProvider } from '@common/configuration/tcp.config';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([UserDestination]),
+    MongooseModule.forFeature([UserDestination, RoleDestination]),
     ClientsModule.registerAsync([TcpProvider(TCP_SERVICES.AUTHORIZER_SERVICE)]),
   ],
   controllers: [UserController],
