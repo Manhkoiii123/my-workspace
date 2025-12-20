@@ -14,13 +14,19 @@ import { TCP_SERVICES } from '@common/configuration/tcp.config';
 import { TcpClient } from '@common/interfaces/tcp/common/tcp-client.interface';
 import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.enum';
 import { AuthorizeResponse } from '@common/interfaces/tcp/authorizer';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import * as crypto from 'crypto';
 @Injectable()
 export class UserGuard implements CanActivate {
   private readonly logger = new Logger(UserGuard.name);
   constructor(
     private readonly reflector: Reflector,
     @Inject(TCP_SERVICES.AUTHORIZER_SERVICE)
-    private readonly authorizerClient: TcpClient
+    private readonly authorizerClient: TcpClient,
+
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache
   ) {}
   canActivate(
     context: ExecutionContext
@@ -42,13 +48,27 @@ export class UserGuard implements CanActivate {
   private async verifyToken(request: any): Promise<boolean> {
     try {
       const token = getAccessToken(request);
+
+      const cacheKey = this.generateTokenCacheKey(token);
       const processId = request[MetadataKeys.PROCESS_ID];
+
+      const cacheData = await this.cacheManager.get<AuthorizeResponse>(
+        cacheKey
+      );
+
+      if (cacheData) {
+        setUserData(request, cacheData);
+        return true;
+      }
+
       // call tcp qua auth để verify token
       const res = await this.verifyUserToken(token, processId);
       if (!res?.valid) {
         throw new UnauthorizedException("Token doesn't exist");
       }
+      this.logger.debug(`set cache for key: ${cacheKey}`);
       setUserData(request, res);
+      await this.cacheManager.set(cacheKey, res, 30 * 60 * 1000); // lưu cache 30 phút
       return true;
     } catch (error) {
       this.logger.error({ error });
@@ -68,5 +88,10 @@ export class UserGuard implements CanActivate {
         )
         .pipe(map((data) => data.data))
     );
+  }
+
+  generateTokenCacheKey(token: string): string {
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    return `user-token:${hash}`;
   }
 }
