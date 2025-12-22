@@ -1,0 +1,3 @@
+syntax = "proto3";
+
+package GRPC_AUTHORIZER_SERVICE;
