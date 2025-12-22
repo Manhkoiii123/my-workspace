@@ -20,7 +20,7 @@ class Configuration extends BaseConfiguration {
 
   @ValidateNested()
   @Type(() => GrpcConfiguration)
-  GRPC_CONFIG = new GrpcConfiguration();
+  GRPC_SERV = new GrpcConfiguration();
 }
 
 export const CONFIGURATION = new Configuration();

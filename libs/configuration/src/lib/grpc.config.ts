@@ -1,4 +1,9 @@
-import { GrpcOptions, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import {
+  ClientsProviderAsyncOptions,
+  GrpcOptions,
+  Transport,
+} from '@nestjs/microservices';
 import { IsNotEmpty, IsObject } from 'class-validator';
 import { join } from 'path';
 
@@ -47,3 +52,18 @@ export class GrpcConfiguration {
     };
   }
 }
+
+export const GrpcProvider = (
+  serviceName: GRPC_SERVICES
+): ClientsProviderAsyncOptions => {
+  return {
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: async (configService: ConfigService) => {
+      return configService.get(`GRPC_SERV.${serviceName}`) as GrpcOptions & {
+        name: string;
+      };
+    },
+    name: serviceName,
+  };
+};
