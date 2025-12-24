@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package GRPC_USER_ACCESS_SERVICE;
+
+service UserAccessService {
+  rpc getByUserId(UserById) returns (UserResponse)
+}
+
+message UserById {
+  string userId = 1;
+  string processId = 2;
+}
+message Role {
+  string name = 1;
+  string description = 2;
+  repeated string permissions = 3;
+}
+
+message User {
+  string _id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+  repeated Role roles = 5;
+}
+message UserResponse {
+  string code = 1;
+  User data = 2;
+  string error = 3;
+}

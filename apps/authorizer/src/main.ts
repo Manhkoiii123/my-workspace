@@ -16,11 +16,11 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
-      package: AppModule.CONFIGURATION.GRPC_CONFIG.GRPC_AUTHORIZER_SERVICE.name,
+      package: AppModule.CONFIGURATION.GRPC_SERV.GRPC_AUTHORIZER_SERVICE.name,
       protoPath:
-        AppModule.CONFIGURATION.GRPC_CONFIG.GRPC_AUTHORIZER_SERVICE.options
+        AppModule.CONFIGURATION.GRPC_SERV.GRPC_AUTHORIZER_SERVICE.options
           .protoPath,
-      url: AppModule.CONFIGURATION.GRPC_CONFIG.GRPC_AUTHORIZER_SERVICE.options
+      url: AppModule.CONFIGURATION.GRPC_SERV.GRPC_AUTHORIZER_SERVICE.options
         .url,
     },
   });
