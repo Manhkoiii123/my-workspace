@@ -10,6 +10,7 @@
 - [6. Khi nào sử dụng TCP và gRPC](#6-khi-nào-sử-dụng-tcp-và-grpc)
 - [7. gRPC trong Microservices](#7-grpc-trong-microservices)
 - [8. Luồng gọi gRPC verifyUserToken trong Project](#8-luồng-gọi-grpc-verifyusertoken-trong-project)
+- [9. Tóm tắt gRPC trong Dự án Invoice App](#9-tóm-tắt-grpc-trong-dự-án-invoice-app)
 
 ---
 
