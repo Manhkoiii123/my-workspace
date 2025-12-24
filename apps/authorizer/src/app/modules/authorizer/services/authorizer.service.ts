@@ -18,16 +18,22 @@ import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
 import { TcpClient } from '@common/interfaces/tcp/common/tcp-client.interface';
 import { Role } from '@common/schemas/role.schema';
+import { GRPC_SERVICES } from '@common/configuration/grpc.config';
+import { ClientGrpc } from '@nestjs/microservices';
+import { UserAccessService } from '@common/interfaces/grpc/user-access';
 
 @Injectable()
 export class AuthorizerService {
+  private userAccessService: UserAccessService;
   private readonly logger = new Logger(AuthorizerService.name);
   private jwksClient: JwksClient;
   constructor(
     private readonly keycloakHttpService: KeycloakHttpService,
     private readonly configService: ConfigService,
     @Inject(TCP_SERVICES.USER_ACCESS_SERVICE)
-    private readonly userAccessClient: TcpClient
+    private readonly userAccessClient: TcpClient,
+    @Inject(GRPC_SERVICES.USER_ACCESS_SERVICE)
+    private readonly userAccessGrpcClient: ClientGrpc
   ) {
     const host = this.configService.get('KEYCLOAK_CONFIG.HOST');
     const realm = this.configService.get('KEYCLOAK_CONFIG.REALM');
@@ -36,6 +42,13 @@ export class AuthorizerService {
       cache: true,
       rateLimit: true,
     });
+  }
+
+  onModuleInit() {
+    this.userAccessService =
+      this.userAccessGrpcClient.getService<UserAccessService>(
+        'UserAccessService'
+      );
   }
   async login(data: LoginTcpRequest) {
     const { password, username } = data;
@@ -87,22 +100,32 @@ export class AuthorizerService {
   }
 
   private async validationUser(userId: string, processId: string) {
-    const user = await this.getUserByUserId(userId, processId);
+    //tcp
+    //  const user = await this.getUserByUserId(userId, processId);
+    // grpc
+    const user = await firstValueFrom(
+      this.userAccessService.getByUserId({ userId, processId }).pipe(
+        map((res) => {
+          return res.data;
+        })
+      )
+    );
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
     return user;
   }
 
+  // tcp
   //get usser qua user id qua keycloak
-  private getUserByUserId(userId: string, processId: string) {
-    return firstValueFrom(
-      this.userAccessClient
-        .send<User, string>(TCP_REQUEST_MESSAGE.USER.GET_BY_USER_ID, {
-          data: userId,
-          processId,
-        })
-        .pipe(map((data) => data.data))
-    );
-  }
+  // private getUserByUserId(userId: string, processId: string) {
+  //   return firstValueFrom(
+  //     this.userAccessClient
+  //       .send<User, string>(TCP_REQUEST_MESSAGE.USER.GET_BY_USER_ID, {
+  //         data: userId,
+  //         processId,
+  //       })
+  //       .pipe(map((data) => data.data))
+  //   );
+  // }
 }

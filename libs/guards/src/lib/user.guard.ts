@@ -17,17 +17,29 @@ import { AuthorizeResponse } from '@common/interfaces/tcp/authorizer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as crypto from 'crypto';
+import { GRPC_SERVICES } from '@common/configuration/grpc.config';
+import { ClientGrpc } from '@nestjs/microservices';
+import { AuthorizerService } from '@common/interfaces/grpc/authorizer';
 @Injectable()
 export class UserGuard implements CanActivate {
   private readonly logger = new Logger(UserGuard.name);
+  private authorizerService: AuthorizerService;
   constructor(
     private readonly reflector: Reflector,
     @Inject(TCP_SERVICES.AUTHORIZER_SERVICE)
     private readonly authorizerClient: TcpClient,
 
     @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache
+    private readonly cacheManager: Cache,
+    @Inject(GRPC_SERVICES.AUTHORIZER_SERVICE)
+    private readonly grpcClient: ClientGrpc
   ) {}
+
+  onModuleInit() {
+    this.authorizerService =
+      this.grpcClient.getService<AuthorizerService>('AuthorizerService');
+  }
+
   canActivate(
     context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -62,7 +74,17 @@ export class UserGuard implements CanActivate {
       }
 
       // call tcp qua auth để verify token
-      const res = await this.verifyUserToken(token, processId);
+      // tcp
+      // const res = await this.verifyUserToken(token, processId);
+
+      // rgpc
+      const { data: res } = await firstValueFrom(
+        this.authorizerService.verifyUserToken({
+          token,
+          processId,
+        })
+      );
+
       if (!res?.valid) {
         throw new UnauthorizedException("Token doesn't exist");
       }
@@ -76,19 +98,20 @@ export class UserGuard implements CanActivate {
     }
   }
 
-  private async verifyUserToken(token: string, processId: string) {
-    return firstValueFrom(
-      this.authorizerClient
-        .send<AuthorizeResponse, string>(
-          TCP_REQUEST_MESSAGE.AUTHORIZER.VERIFY_USER_TOKEN,
-          {
-            data: token,
-            processId,
-          }
-        )
-        .pipe(map((data) => data.data))
-    );
-  }
+  // tcp
+  // private async verifyUserToken(token: string, processId: string) {
+  //   return firstValueFrom(
+  //     this.authorizerClient
+  //       .send<AuthorizeResponse, string>(
+  //         TCP_REQUEST_MESSAGE.AUTHORIZER.VERIFY_USER_TOKEN,
+  //         {
+  //           data: token,
+  //           processId,
+  //         }
+  //       )
+  //       .pipe(map((data) => data.data))
+  //   );
+  // }
 
   generateTokenCacheKey(token: string): string {
     const hash = crypto.createHash('sha256').update(token).digest('hex');
