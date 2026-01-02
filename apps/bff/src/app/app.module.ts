@@ -16,6 +16,7 @@ import { PermissionGuard } from '@common/guards/permission.guard';
 import { RedisProvider } from '@common/configuration/redis.config';
 import { ThrottlerProvider } from '@common/configuration/throttler.config';
 import { GRPC_SERVICES, GrpcProvider } from '@common/configuration/grpc.config';
+import { WebhookModule } from './modules/webhook/webhook.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { GRPC_SERVICES, GrpcProvider } from '@common/configuration/grpc.config';
     ProductModule,
     UserModule,
     AuthorizerModule,
+    WebhookModule,
     ClientsModule.registerAsync([TcpProvider(TCP_SERVICES.AUTHORIZER_SERVICE)]),
     RedisProvider,
     ThrottlerProvider,
