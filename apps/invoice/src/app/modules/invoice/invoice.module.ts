@@ -8,6 +8,8 @@ import { InvoiceRepository } from './repositories/invoice.repository';
 import { TCP_SERVICES, TcpProvider } from '@common/configuration/tcp.config';
 import { PaymentModule } from '../payment/payment.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { QUEUE_SERVICE } from '@common/constants/enum/queue.enum';
+import { KafkaModule } from '@common/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -18,21 +20,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       TcpProvider(TCP_SERVICES.MEDIA_SERVICE),
     ]),
     PaymentModule,
-    ClientsModule.register([
-      {
-        name: 'INVOICE_SERVICE',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            clientId: 'invoice-clientid',
-            brokers: ['localhost:9092'],
-          },
-          consumer: {
-            groupId: 'hero-consumer',
-          },
-        },
-      },
-    ]),
+    KafkaModule.register(QUEUE_SERVICE.INVOICE),
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService, InvoiceRepository],

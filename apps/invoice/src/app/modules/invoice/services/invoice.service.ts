@@ -20,6 +20,7 @@ import { ObjectId } from 'mongodb';
 import { UploadFileTcpReq } from '@common/interfaces/tcp/media';
 import { PaymentService } from '../../payment/services/payment.service';
 import { ClientKafka } from '@nestjs/microservices';
+import { KafkaService } from '@common/kafka/kafka.service';
 @Injectable()
 export class InvoiceService {
   constructor(
@@ -29,12 +30,9 @@ export class InvoiceService {
     @Inject(TCP_SERVICES.MEDIA_SERVICE)
     private readonly mediaClient: TcpClient,
     private readonly paymentService: PaymentService,
-    @Inject('INVOICE_SERVICE') private readonly mailClient: ClientKafka
+    private readonly kafkaClient: KafkaService
   ) {}
 
-  onModuleInit() {
-    this.mailClient.connect();
-  }
   create(params: CreateInvoiceTcpRequest) {
     const input = invoiceRequestMapping(params);
     return this.invoiceRepository.create(input);
@@ -67,7 +65,7 @@ export class InvoiceService {
       fileUrl,
     });
 
-    this.mailClient.emit('invoice-send', {
+    this.kafkaClient.emit('invoice-send', {
       invoiceId,
       clientEmail: invoice.client.email,
     });
