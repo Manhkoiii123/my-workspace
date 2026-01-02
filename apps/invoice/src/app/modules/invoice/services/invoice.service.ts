@@ -5,7 +5,10 @@ import {
   InvoiceTcpResponse,
   SendInvoiceTcpReq,
 } from '@common/interfaces/tcp/invoice';
-import { invoiceRequestMapping } from '../mappers';
+import {
+  createCheckoutSessionMapping,
+  invoiceRequestMapping,
+} from '../mappers';
 import { INVOICE_STATUS } from '@common/constants/enum/invoice.enum';
 import { ERROR_CODE } from '@common/constants/enum/error-code.enum';
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
@@ -15,6 +18,7 @@ import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.
 import { Invoice } from '@common/schemas/invoice.schema';
 import { ObjectId } from 'mongodb';
 import { UploadFileTcpReq } from '@common/interfaces/tcp/media';
+import { PaymentService } from '../../payment/services/payment.service';
 @Injectable()
 export class InvoiceService {
   constructor(
@@ -22,7 +26,8 @@ export class InvoiceService {
     @Inject(TCP_SERVICES.PDF_GENERATOR_SERVICE)
     private readonly pdfGeneratorClient: TcpClient,
     @Inject(TCP_SERVICES.MEDIA_SERVICE)
-    private readonly mediaClient: TcpClient
+    private readonly mediaClient: TcpClient,
+    private readonly paymentService: PaymentService
   ) {}
   create(params: CreateInvoiceTcpRequest) {
     const input = invoiceRequestMapping(params);
@@ -45,13 +50,18 @@ export class InvoiceService {
       processId
     );
 
+    // link thanh toán
+    const checkoutData = await this.paymentService.createCheckoutSession(
+      createCheckoutSessionMapping(invoice)
+    );
+
     await this.invoiceRepository.updateById(invoiceId, {
       status: INVOICE_STATUS.SENT,
       supervisorId: new ObjectId(userId),
       fileUrl,
     });
 
-    return fileUrl;
+    return checkoutData.url;
   }
 
   generatorInvoicePdf(data: Invoice, processId: string) {
@@ -77,5 +87,11 @@ export class InvoiceService {
         })
         .pipe(map((data) => data.data))
     );
+  }
+
+  updateInvoicePaid(invoiceId: string) {
+    return this.invoiceRepository.updateById(invoiceId, {
+      status: INVOICE_STATUS.PAID,
+    });
   }
 }
