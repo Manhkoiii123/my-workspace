@@ -9,7 +9,9 @@ import { TCP_REQUEST_MESSAGE } from '@common/constants/enum/tcp-request-message.
 import {
   CreateInvoiceTcpRequest,
   InvoiceTcpResponse,
+  SendInvoiceTcpReq,
 } from '@common/interfaces/tcp/invoice';
+import { HTTP_MESSAGE } from '@common/constants/enum/http-message.enum';
 @Controller()
 @UseInterceptors(TcpLoggingInterceptor)
 export class InvoiceController {
@@ -22,5 +24,14 @@ export class InvoiceController {
   ): Promise<Response<InvoiceTcpResponse>> {
     const res = await this.invoiceService.create(params);
     return Response.success<InvoiceTcpResponse>(res);
+  }
+
+  @MessagePattern(TCP_REQUEST_MESSAGE.INVOICE.SEND)
+  async sendById(
+    @RequestParam() params: SendInvoiceTcpReq,
+    @ProcessId() processId: string
+  ): Promise<Response<string>> {
+    const res = await this.invoiceService.sendById(params, processId);
+    return Response.success<string>(res);
   }
 }
