@@ -31,8 +31,8 @@ export class InvoiceController {
     @RequestParam() params: SendInvoiceTcpReq,
     @ProcessId() processId: string
   ): Promise<Response<string>> {
-    const res = await this.invoiceService.sendById(params, processId);
-    return Response.success<string>(res);
+    await this.invoiceService.sendById(params, processId);
+    return Response.success<string>(HTTP_MESSAGE.OK);
   }
   @MessagePattern(TCP_REQUEST_MESSAGE.INVOICE.UPDATE_INVOICE_PAID)
   async updateInvoicePaid(
@@ -40,5 +40,13 @@ export class InvoiceController {
   ): Promise<Response<string>> {
     const res = await this.invoiceService.updateInvoicePaid(invoiceId);
     return Response.success<string>(HTTP_MESSAGE.UPDATED);
+  }
+
+  @MessagePattern(TCP_REQUEST_MESSAGE.INVOICE.GET_BY_ID)
+  async getInvoiceById(
+    @RequestParam() invoiceId: string
+  ): Promise<Response<InvoiceTcpResponse>> {
+    const res = await this.invoiceService.getInvoiceById(invoiceId);
+    return Response.success<InvoiceTcpResponse>(res);
   }
 }
