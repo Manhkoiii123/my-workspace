@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { CONFIGURATION, TConfiguration } from '../configuration';
 import { ConfigModule } from '@nestjs/config';
-import { InvoiceModule } from './modules/invoice/invoice.module';
-import { PaymentModule } from './modules/payment/payment.module';
+import { MailModule } from './modules/mail/mail.module';
+import { MailTemplateModule } from './modules/mail-template/mail-template.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [() => CONFIGURATION],
     }),
-    InvoiceModule,
-    PaymentModule,
+    MailModule,
+    MailTemplateModule,
   ],
 })
 export class AppModule {
